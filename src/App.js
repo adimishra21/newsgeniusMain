@@ -1,9 +1,5 @@
 import React, { useState, useMemo, createContext, useEffect } from "react";
-<<<<<<< HEAD
-import { Route, Routes, useNavigate } from "react-router-dom";
-=======
 import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
 import { Button, CssBaseline, Box } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Provider } from 'react-redux';
@@ -18,14 +14,7 @@ import Entertainment from './Components/Entertainment/Entertainment';
 import EntertainmentDetails from './Components/Entertainment/EntertainmentDetails';
 import Community from './Components/Community/Community';
 import Sports from './Components/Sports/Sports';
-<<<<<<< HEAD
-import Astrology from './Components/Astrology/Astrology';
-import Business from './Components/Business/Business';
-import Technology from './Components/Technology/Technology';
-import Education from './Components/Education/Education';
-=======
 import SportsDetails from './Components/Sports/SportsDetails';
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
 import "./App.css";
 import syncUserData from './utils/userDataSync';
 
@@ -99,50 +88,6 @@ function App() {
       <Provider store={store}>
         <ThemeProvider theme={muiTheme}>
           <CssBaseline />
-<<<<<<< HEAD
-      <div className="App">
-        <div style={{ position: 'absolute', top: 16, right: 16 }}>
-          {user ? (
-            <Button 
-              variant="contained" 
-              onClick={logout}
-            >
-              Logout
-            </Button>
-          ) : (
-            <Button 
-              variant="contained" 
-              onClick={() => navigate('/auth')}
-            >
-              Login/Signup
-            </Button>
-          )}
-        </div>
-        
-        <Box component="main">
-          <AuthContext.Provider value={{ user, login }}>
-            <Routes>
-              <Route path="/" element={<HomePage theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/auth" element={<LoginSignup />} />
-              <Route path="/auth/signup" element={<Signup />} />
-              <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/explore" element={<Explore theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/entertainment" element={<Entertainment theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/entertainment/article/:id" element={<EntertainmentDetails theme={theme} />} />
-              <Route path="/entertainment/release/:id" element={<EntertainmentDetails theme={theme} />} />
-              <Route path="/entertainment/category/:category" element={<Entertainment theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/entertainment/tag/:tag" element={<Entertainment theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/communities" element={<Community theme={theme} />} />
-              <Route path="/sports" element={<Sports theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/astrology" element={<Astrology theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/business" element={<Business theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/technology" element={<Technology theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/education" element={<Education theme={theme} toggleTheme={toggleTheme} />} />
-              {/* Add other routes here */}
-            </Routes>
-          </AuthContext.Provider>
-        </Box>
-=======
           <div className="App">
             <div style={{ position: 'absolute', top: 16, right: 16 }}>
               {user ? (
@@ -195,7 +140,6 @@ function App() {
                 </Routes>
               </AuthContext.Provider>
             </Box>
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
           </div>
         </ThemeProvider>
       </Provider>
@@ -203,9 +147,4 @@ function App() {
   );
 }
 
-<<<<<<< HEAD
-
 export default App;
-=======
-export default App; 
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
