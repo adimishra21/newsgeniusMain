@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('Starting Netlify build fix script...');
+console.log('Current working directory:', process.cwd());
 
 // Function to modify package.json to ensure dependencies are correct
 function updatePackageJson() {
@@ -53,6 +54,86 @@ function updatePackageJson() {
     console.log('Successfully updated package.json');
   } catch (error) {
     console.error('Error updating package.json:', error);
+  }
+}
+
+// Scan for import path issues and fix them
+function fixProfilePathIssue() {
+  console.log('Fixing Profile.jsx path issue...');
+
+  try {
+    // Check if Profile.jsx exists in the correct location
+    const correctProfilePath = path.join(process.cwd(), 'src', 'Components', 'Profile', 'Profile.jsx');
+    const lowerCaseProfilePath = path.join(process.cwd(), 'src', 'components', 'Profile.jsx');
+    
+    // Log the paths we're checking
+    console.log(`Checking for correct Profile.jsx path: ${correctProfilePath}`);
+    console.log(`Checking for lowercase Profile.jsx path: ${lowerCaseProfilePath}`);
+    
+    // If the lowercase version is imported but doesn't exist, create the directory
+    const lowerCaseProfileDir = path.dirname(lowerCaseProfilePath);
+    if (!fs.existsSync(lowerCaseProfileDir)) {
+      console.log(`Creating directory: ${lowerCaseProfileDir}`);
+      fs.mkdirSync(lowerCaseProfileDir, { recursive: true });
+    }
+
+    // If the Profile.jsx exists in the correct location but not in the lowercase location
+    if (fs.existsSync(correctProfilePath) && !fs.existsSync(lowerCaseProfilePath)) {
+      console.log('Found Profile.jsx in correct location, copying to lowercase path...');
+      const profileContent = fs.readFileSync(correctProfilePath, 'utf8');
+      fs.writeFileSync(lowerCaseProfilePath, profileContent);
+      console.log('Successfully copied Profile.jsx to lowercase path');
+    } 
+    // If Profile.jsx doesn't exist anywhere, create a simple version
+    else if (!fs.existsSync(correctProfilePath) && !fs.existsSync(lowerCaseProfilePath)) {
+      console.log('Profile.jsx not found, creating a placeholder...');
+      const profileContent = `
+import React from 'react';
+import { Box, Typography, Avatar, Button, Grid, Paper } from '@mui/material';
+
+const Profile = () => {
+  return (
+    <Box sx={{ padding: 3 }}>
+      <Paper elevation={3} sx={{ p: 3 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
+            <Avatar 
+              sx={{ width: 150, height: 150, margin: '0 auto 20px' }}
+              alt="User Profile"
+              src="/logo.jpg"
+            />
+            <Typography variant="h5">User Profile</Typography>
+            <Typography variant="body2" color="text.secondary">
+              user@example.com
+            </Typography>
+            <Button variant="contained" sx={{ mt: 2 }}>
+              Edit Profile
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <Typography variant="h6" gutterBottom>Profile Information</Typography>
+            <Typography paragraph>
+              This is a placeholder profile component created to fix build issues.
+              You can customize this component with actual user data once the build process is complete.
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
+    </Box>
+  );
+};
+
+export default Profile;
+`;
+      fs.writeFileSync(lowerCaseProfilePath, profileContent);
+      console.log('Created placeholder Profile.jsx file');
+    }
+
+    // Check for any imports from the wrong path in other files
+    console.log('Checking for import path issues in other files...');
+    fixImportPaths();
+  } catch (error) {
+    console.error('Error fixing Profile.jsx:', error);
   }
 }
 
@@ -171,10 +252,11 @@ export const getMockNews = (category) => {
       }
     });
     
-    // Fix Grid component props in all JSX files
-    const componentsDir = path.join(process.cwd(), 'src', 'Components');
-    if (fs.existsSync(componentsDir)) {
-      processDirectory(componentsDir);
+    // Fix import paths in all JSX files
+    const srcDir = path.join(process.cwd(), 'src');
+    if (fs.existsSync(srcDir)) {
+      processDirectory(srcDir);
+      console.log('Fixed import paths in src directory');
     }
     
     console.log('Import path checks completed');
@@ -207,6 +289,17 @@ function fixFileImports(filePath) {
     // Fix Grid container xs={12} to container item xs={12}
     if (content.includes('<Grid container xs={12}')) {
       content = content.replace(/<Grid container xs={12}/g, '<Grid container item xs={12}');
+      modified = true;
+    }
+    
+    // Fix Profile.jsx import paths
+    if (content.includes("from '../components/Profile'") || 
+        content.includes("from './components/Profile'") ||
+        content.includes("from 'components/Profile'")) {
+      content = content.replace(
+        /from ['"](.*)components\/Profile['"]/g, 
+        'from \'../Components/Profile/Profile\''
+      );
       modified = true;
     }
     
@@ -364,9 +457,44 @@ export default Ticker;
   }
 }
 
+// List all files in the src directory to help debugging
+function listProjectFiles() {
+  console.log('Listing all JavaScript/JSX files in src directory for debugging:');
+  
+  const srcDir = path.join(process.cwd(), 'src');
+  if (!fs.existsSync(srcDir)) {
+    console.log('src directory not found!');
+    return;
+  }
+  
+  function traverseAndList(dir, prefix = '') {
+    const items = fs.readdirSync(dir, { withFileTypes: true });
+    
+    for (const item of items) {
+      const itemPath = path.join(dir, item.name);
+      const relativePath = path.relative(process.cwd(), itemPath);
+      
+      if (item.isDirectory()) {
+        console.log(`${prefix}📁 ${item.name}`);
+        traverseAndList(itemPath, prefix + '  ');
+      } else if (item.name.endsWith('.js') || item.name.endsWith('.jsx')) {
+        console.log(`${prefix}📄 ${item.name}`);
+      }
+    }
+  }
+  
+  traverseAndList(srcDir);
+}
+
 // Run all fix functions
 console.log('Running package.json updates...');
 updatePackageJson();
+
+console.log('Listing project files for debugging...');
+listProjectFiles();
+
+console.log('Fixing Profile.jsx path issue...');
+fixProfilePathIssue();
 
 console.log('Ensuring required components exist...');
 ensureTickerComponent();
