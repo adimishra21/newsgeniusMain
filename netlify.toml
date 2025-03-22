@@ -1,12 +1,13 @@
-[build] 
-  publish = "newsgenius-main/build" 
-  command = "npm run build" 
- 
-[build.environment] 
-  NODE_VERSION = "16" 
-  REACT_APP_NEWS_API_KEY = "9e76e457ea734bd79ae1f3b784796948" 
- 
-[[redirects]] 
-  from = "/*" 
-  to = "/index.html" 
-  status = 200 
+[build]
+  base = "/"
+  publish = "newsgenius-main/build"
+  command = "cd newsgenius-main && node ../netlify_build_fix.js && npm install && npm run build"
+
+[build.environment]
+  NODE_VERSION = "16"
+  REACT_APP_NEWS_API_KEY = "9e76e457ea734bd79ae1f3b784796948"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
