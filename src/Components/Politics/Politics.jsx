@@ -17,13 +17,13 @@ const Politics = () => {
         setLoading(true);
         // Fetch national politics news
         const nationalResponse = await axios.get(
-          `https://newsapi.org/v2/everything?q=politics+india&language=en&sortBy=publishedAt&apiKey=9e76e457ea734bd79ae1f3b784796948`
+          `https://newsapi.org/v2/everything?q=politics+india&language=en&sortBy=publishedAt&apiKey=33b913e452b944178aeade1fdbbe1498`
         );
         setNationalNews(nationalResponse.data.articles.slice(0, 10));
 
         // Fetch international politics news
         const internationalResponse = await axios.get(
-          `https://newsapi.org/v2/everything?q=international+politics&language=en&sortBy=publishedAt&apiKey=9e76e457ea734bd79ae1f3b784796948`
+          `https://newsapi.org/v2/everything?q=international+politics&language=en&sortBy=publishedAt&apiKey=33b913e452b944178aeade1fdbbe1498`
         );
         setInternationalNews(internationalResponse.data.articles.slice(0, 10));
       } catch (error) {

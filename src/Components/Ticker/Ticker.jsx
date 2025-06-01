@@ -9,7 +9,7 @@ const Ticker = ({ category }) => {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await axios.get(`https://newsapi.org/v2/everything?q=${category}+india&sortBy=publishedAt&language=en&pageSize=10&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+        const response = await axios.get(`https://newsapi.org/v2/everything?q=${category}+india&sortBy=publishedAt&language=en&pageSize=10&apiKey=33b913e452b944178aeade1fdbbe1498`);
         const headlines = response.data.articles.map(item => item.title);
         setNews(headlines);
       } catch (error) {

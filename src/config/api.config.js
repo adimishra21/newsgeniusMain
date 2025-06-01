@@ -96,6 +96,7 @@ export const authAPI = {
       id: mockUserId,
       name: data.username,
       email: data.email,
+      password: data.password, // Store password for login validation
       role: data.role.toLowerCase(),
       location: data.location || '',
       bio: data.bio || `Hello, I am ${data.username}`,
@@ -145,7 +146,6 @@ export const authAPI = {
   
   login: (data) => {
     // In a real implementation, we would validate credentials with the backend
-    // For now, we'll simulate login by checking if the user exists
     
     try {
       // Get existing users from localStorage
@@ -171,50 +171,19 @@ export const authAPI = {
         }
       });
       
-      // Generate tokens and IDs
-      let userId, token;
-      
-      if (existingUser) {
-        // Use existing user's ID
-        userId = existingUserId;
-        token = `mock_token_${Date.now()}`;
-        console.log('Found existing user:', existingUser.name);
-      } else {
-        // Create new user
-        userId = `user_${Date.now()}`;
-        token = `mock_token_${Date.now()}`;
-        
-        // Create user info based on email (just mock data)
-        const username = data.email.split('@')[0];
-        
-        // Create a default profile for the new user
-        const userInfo = {
-          id: userId,
-          name: username,
-          email: data.email,
-          role: 'user', // Default role
-          location: '',
-          bio: `Hello, I am ${username}`,
-          channelName: '',
-          mobile: '',
-          website: '',
-          image: "https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_960_720.png",
-          backgroundImage: "https://cdn.pixabay.com/photo/2021/07/02/00/20/woman-6380562_640.jpg",
-          isVerified: false,
-          profession: "Education",
-          following: 0,
-          followers: 0,
-          rating: 4.0,
-          joinedDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
-        };
-        
-        // Store user profile in the users object
-        users[userId] = userInfo;
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        existingUser = userInfo;
-        console.log('Created new user:', username);
+      // Check if user exists
+      if (!existingUser) {
+        return Promise.reject(new Error('Invalid email or password'));
       }
+      
+      // Check password (if there is a stored password)
+      if (existingUser.hasOwnProperty('password') && existingUser.password !== data.password) {
+        return Promise.reject(new Error('Invalid email or password'));
+      }
+      
+      // Generate token
+      const userId = existingUserId;
+      const token = `mock_token_${Date.now()}`;
       
       // Store user info in localStorage for session management
       localStorage.setItem('userId', userId);
@@ -247,6 +216,166 @@ export const authAPI = {
     }
   },
   verifyToken: () => api.get('/auth/verify'),
+
+  requestPasswordReset: async (data) => {
+    try {
+      // Get existing users from localStorage
+      let users = {};
+      try {
+        const storedUsers = localStorage.getItem('users');
+        if (storedUsers) {
+          users = JSON.parse(storedUsers);
+        }
+      } catch (err) {
+        console.error('Error parsing stored users:', err);
+      }
+      
+      // Try to find existing user by email
+      let existingUser = null;
+      let existingUserId = null;
+      
+      // Look through all users to find a match by email
+      Object.entries(users).forEach(([id, user]) => {
+        if (user.email === data.email) {
+          existingUser = user;
+          existingUserId = id;
+        }
+      });
+      
+      // Check if user exists
+      if (!existingUser) {
+        return Promise.reject(new Error('No account found with this email address'));
+      }
+      
+      // Generate a reset token
+      const resetToken = `reset_token_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      
+      // Store the reset token with an expiration time (1 hour from now)
+      const resetTokenData = {
+        token: resetToken,
+        userId: existingUserId,
+        expires: new Date(Date.now() + 60 * 60 * 1000).getTime(), // 1 hour
+        used: false
+      };
+      
+      // Get existing reset tokens from localStorage
+      let resetTokens = {};
+      try {
+        const storedTokens = localStorage.getItem('resetTokens');
+        if (storedTokens) {
+          resetTokens = JSON.parse(storedTokens);
+        }
+      } catch (err) {
+        console.error('Error parsing stored reset tokens:', err);
+      }
+      
+      // Store the new reset token
+      resetTokens[resetToken] = resetTokenData;
+      localStorage.setItem('resetTokens', JSON.stringify(resetTokens));
+      
+      // Generate the reset link 
+      const resetLink = `${window.location.origin}/auth/reset-password/${resetToken}`;
+      console.log(`Password reset link: ${resetLink}`);
+      
+      // Dynamically import the email service to avoid circular dependency
+      try {
+        // Import the email service dynamically to avoid circular dependencies
+        const emailService = await import('../utils/emailService');
+        const sendPasswordResetEmail = emailService.default || emailService.sendPasswordResetEmail;
+        
+        await sendPasswordResetEmail(data.email, resetLink);
+        
+        return {
+          data: {
+            message: 'Password reset instructions sent to your email'
+          }
+        };
+      } catch (error) {
+        console.error('Error sending reset email:', error);
+        // Even if email sending fails, still return success to prevent user enumeration
+        return {
+          data: {
+            message: 'If an account exists with this email, password reset instructions will be sent'
+          }
+        };
+      }
+    } catch (err) {
+      console.error('Error during password reset request:', err);
+      return Promise.reject(new Error('Password reset request failed'));
+    }
+  },
+  
+  resetPassword: (data) => {
+    try {
+      const { token, password } = data;
+      
+      // Get reset tokens from localStorage
+      let resetTokens = {};
+      try {
+        const storedTokens = localStorage.getItem('resetTokens');
+        if (storedTokens) {
+          resetTokens = JSON.parse(storedTokens);
+        }
+      } catch (err) {
+        console.error('Error parsing stored reset tokens:', err);
+      }
+      
+      // Find the token
+      const tokenData = resetTokens[token];
+      
+      // Validate token
+      if (!tokenData) {
+        return Promise.reject(new Error('Invalid or expired reset token'));
+      }
+      
+      // Check if token is expired
+      if (Date.now() > tokenData.expires) {
+        return Promise.reject(new Error('Reset token has expired'));
+      }
+      
+      // Check if token has been used
+      if (tokenData.used) {
+        return Promise.reject(new Error('Reset token has already been used'));
+      }
+      
+      // Get user data
+      const userId = tokenData.userId;
+      let users = {};
+      try {
+        const storedUsers = localStorage.getItem('users');
+        if (storedUsers) {
+          users = JSON.parse(storedUsers);
+        }
+      } catch (err) {
+        console.error('Error parsing stored users:', err);
+      }
+      
+      // Find the user
+      const user = users[userId];
+      if (!user) {
+        return Promise.reject(new Error('User not found'));
+      }
+      
+      // Update the password
+      user.password = password;
+      users[userId] = user;
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      // Mark token as used
+      tokenData.used = true;
+      resetTokens[token] = tokenData;
+      localStorage.setItem('resetTokens', JSON.stringify(resetTokens));
+      
+      return Promise.resolve({
+        data: {
+          message: 'Password reset successful'
+        }
+      });
+    } catch (err) {
+      console.error('Error during password reset:', err);
+      return Promise.reject(new Error('Password reset failed'));
+    }
+  }
 };
 
 // Article API endpoints with role-based operations

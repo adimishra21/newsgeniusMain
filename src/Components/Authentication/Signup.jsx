@@ -18,7 +18,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../../config/api.config';
-import { AuthContext } from '../../App';
+import { AuthContext } from '../../utils/contexts';
 import './Auth.css';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';

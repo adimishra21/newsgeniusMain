@@ -11,10 +11,6 @@ import ComputerIcon from '@mui/icons-material/Computer';
 import SchoolIcon from '@mui/icons-material/School';
 
 export const navigationMenu=[
-<<<<<<< HEAD
-
-=======
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
     {
         title:"Home",
         icon:<HomeIcon/>,
@@ -39,10 +35,6 @@ export const navigationMenu=[
         icon:<AccountCircleIcon/>,
         path:"/profile"
     },
-<<<<<<< HEAD
-   
-=======
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
     {
         title:"Entertainment",
         icon:<TheatersIcon/>,
@@ -72,10 +64,5 @@ export const navigationMenu=[
         title:"Education",
         icon:<SchoolIcon/>,
         path:"/education"
-<<<<<<< HEAD
-    },
-]
-=======
     }
-] 
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
+]

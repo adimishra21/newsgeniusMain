@@ -4,8 +4,10 @@ import Navigation from '../Navigation/Navigation';
 import RightPart from '../RightPart/RightPart';
 import Ticker from '../Ticker/Ticker';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Business = ({ theme, toggleTheme }) => {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [businessNews, setBusinessNews] = useState([]);
@@ -37,7 +39,7 @@ const Business = ({ theme, toggleTheme }) => {
   // Function to fetch business news from API
   const fetchBusinessNews = async () => {
     try {
-      const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&category=business&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+      const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&category=business&apiKey=33b913e452b944178aeade1fdbbe1498`);
       const news = response.data.articles.map(item => ({
         id: item.url,
         title: item.title,
@@ -56,7 +58,7 @@ const Business = ({ theme, toggleTheme }) => {
   // Function to fetch stock market data
   const fetchStockMarket = async () => {
     try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=stock+market+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+      const response = await axios.get(`https://newsapi.org/v2/everything?q=stock+market+india&sortBy=publishedAt&language=en&apiKey=33b913e452b944178aeade1fdbbe1498`);
       const stocks = response.data.articles.map(item => ({
         id: item.url,
         title: item.title,
@@ -75,7 +77,7 @@ const Business = ({ theme, toggleTheme }) => {
   // Function to fetch cryptocurrency data
   const fetchCryptocurrency = async () => {
     try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=cryptocurrency+bitcoin&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+      const response = await axios.get(`https://newsapi.org/v2/everything?q=cryptocurrency+bitcoin&sortBy=publishedAt&language=en&apiKey=33b913e452b944178aeade1fdbbe1498`);
       const crypto = response.data.articles.map(item => ({
         id: item.url,
         title: item.title,
@@ -94,7 +96,7 @@ const Business = ({ theme, toggleTheme }) => {
   // Function to fetch personal finance data
   const fetchPersonalFinance = async () => {
     try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=personal+finance+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+      const response = await axios.get(`https://newsapi.org/v2/everything?q=personal+finance+india&sortBy=publishedAt&language=en&apiKey=33b913e452b944178aeade1fdbbe1498`);
       const finance = response.data.articles.map(item => ({
         id: item.url,
         title: item.title,
@@ -113,7 +115,7 @@ const Business = ({ theme, toggleTheme }) => {
   // Function to fetch featured business news for slideshow
   const fetchFeaturedNews = async () => {
     try {
-      const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&category=business&pageSize=5&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+      const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&category=business&pageSize=5&apiKey=33b913e452b944178aeade1fdbbe1498`);
       const featured = response.data.articles.map(item => ({
         id: item.url,
         title: item.title,
@@ -174,8 +176,10 @@ const Business = ({ theme, toggleTheme }) => {
             height: '400px',
             position: 'relative',
             overflow: 'hidden',
-            borderRadius: 2
+            borderRadius: 2,
+            cursor: 'pointer'
           }}
+          onClick={() => navigate(`/business/details/${encodeURIComponent(featuredNews[currentSlide]?.id)}/business`)}
         >
           <CardMedia
             component="img"
@@ -240,30 +244,51 @@ const Business = ({ theme, toggleTheme }) => {
       );
     }
 
+    let newsToShow = [];
     switch (selectedTab) {
       case 0:
-        return (
-          <Box sx={{ mb: 4 }}>
-            {renderSlideshow()}
-            <Typography variant="h5" gutterBottom>
-              Latest Business News
-            </Typography>
-            {businessNews.map((news) => (
+        newsToShow = businessNews;
+        break;
+      case 1:
+        newsToShow = stockMarket;
+        break;
+      case 2:
+        newsToShow = cryptocurrency;
+        break;
+      case 3:
+        newsToShow = personalFinance;
+        break;
+      default:
+        newsToShow = businessNews;
+    }
+
+    return (
+      <Box>
+        {renderSlideshow()}
+        
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+          {categories[selectedTab].label}
+        </Typography>
+        
+        <Grid container spacing={3}>
+          {newsToShow.map((news) => (
+            <Grid item xs={12} sm={6} md={4} key={news.id}>
               <Card 
-                key={news.id} 
                 sx={{ 
-                  mb: 2,
+                  height: '100%',
+                  cursor: 'pointer',
                   transition: 'transform 0.2s',
                   '&:hover': {
-                    transform: 'scale(1.02)',
+                    transform: 'scale(1.03)',
                     boxShadow: 3
                   }
                 }}
+                onClick={() => navigate(`/business/details/${encodeURIComponent(news.id)}/business`)}
               >
                 <CardMedia
                   component="img"
-                  height="200"
-                  image={news.image}
+                  height="180"
+                  image={news.image || getBusinessImage(news.category)}
                   alt={news.title}
                   sx={{ objectFit: 'cover' }}
                 />
@@ -271,140 +296,29 @@ const Business = ({ theme, toggleTheme }) => {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                     {news.title}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {news.description?.length > 120 ? 
+                      `${news.description.substring(0, 120)}...` : 
+                      news.description}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                    <Chip 
+                      label={news.category} 
+                      size="small" 
+                      color="primary" 
+                      variant="outlined"
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {news.date}
+                    </Typography>
+                  </Box>
                 </CardContent>
               </Card>
-            ))}
-          </Box>
-        );
-      case 1:
-        return (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              Stock Market Updates
-            </Typography>
-            {stockMarket.map((stock) => (
-              <Card 
-                key={stock.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={stock.image}
-                  alt={stock.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {stock.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {stock.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {stock.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
-      case 2:
-        return (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              Cryptocurrency News
-            </Typography>
-            {cryptocurrency.map((crypto) => (
-              <Card 
-                key={crypto.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={crypto.image}
-                  alt={crypto.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {crypto.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {crypto.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {crypto.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
-      case 3:
-        return (
-          <Box>
-            <Typography variant="h5" gutterBottom>
-              Personal Finance
-            </Typography>
-            {personalFinance.map((finance) => (
-              <Card 
-                key={finance.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={finance.image}
-                  alt={finance.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {finance.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {finance.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {finance.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
-      default:
-        return null;
-    }
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
   };
 
   return (

@@ -13,7 +13,7 @@ const Carousel = () => {
     const fetchImages = async () => {
       try {
         const response = await axios.get(
-          'https://newsapi.org/v2/top-headlines?country=us&apiKey=9e76e457ea734bd79ae1f3b784796948'
+          'https://newsapi.org/v2/top-headlines?country=us&apiKey=33b913e452b944178aeade1fdbbe1498'
         );
         const articlesWithImages = response.data.articles.filter(
           (article) => article.urlToImage && article.urlToImage.startsWith('http')

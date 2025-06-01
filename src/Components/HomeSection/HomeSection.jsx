@@ -1,6 +1,6 @@
 import { Avatar, Button } from '@mui/material'
 import { useFormik } from 'formik'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import * as Yup from 'yup'
 import ImageIcon from '@mui/icons-material/Image';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
@@ -10,6 +10,11 @@ import { articleAPI } from '../../config/api.config';
 import Carousel from '../Carousel/Carousel';
 import axios from 'axios';
 import ArticleCreation from './ArticleCreation';
+import AutoTranslatedText from '../Common/AutoTranslatedText';
+import { Box, Typography, Chip } from '@mui/material';
+import TranslateIcon from '@mui/icons-material/Translate';
+import { LanguageContext } from '../../utils/contexts';
+import { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from '../../utils/translationUtils';
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().required("Text is required")
@@ -20,13 +25,14 @@ const HomeSection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [headlines, setHeadlines] = useState([]);
+  const { language } = useContext(LanguageContext);
 
   // Fetch news headlines
   useEffect(() => {
     const fetchHeadlines = async () => {
       try {
         const response = await axios.get(
-          'https://newsapi.org/v2/top-headlines?country=us&apiKey=9e76e457ea734bd79ae1f3b784796948'
+          'https://newsapi.org/v2/top-headlines?country=us&apiKey=33b913e452b944178aeade1fdbbe1498'
         );
         setHeadlines(response.data.articles.map((article) => article.title));
       } catch (err) {
@@ -70,10 +76,35 @@ const HomeSection = () => {
     setArticles([newArticle, ...articles]);
   };
 
+  // Get the current language name
+  const currentLanguageName = SUPPORTED_LANGUAGES.find(
+    lang => lang.code === language
+  )?.name || 'English';
+
   return (
     <div className="space-y-5">
       <section>
-        <h1 className="py-5 text-xl font-bold opacity-90">Home</h1>
+        <Box display="flex" alignItems="center" justifyContent="space-between" py={2}>
+          <AutoTranslatedText 
+            text="Home" 
+            component="h1" 
+            typographyProps={{ 
+              className: "text-xl font-bold opacity-90",
+              fontWeight: "bold"
+            }} 
+          />
+          
+          {language !== DEFAULT_LANGUAGE && (
+            <Chip
+              icon={<TranslateIcon fontSize="small" />}
+              label={`Viewing in ${currentLanguageName}`}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          )}
+        </Box>
+        
         {/* Scrolling headlines */}
         <div
           style={{
@@ -88,8 +119,18 @@ const HomeSection = () => {
         >
           <marquee behavior="scroll" direction="left">
             {headlines.length > 0
-              ? headlines.join(' | ')
-              : 'Loading headlines...'}
+              ? headlines.map((headline, index) => (
+                  <React.Fragment key={index}>
+                    <span key={index}>
+                      {language === DEFAULT_LANGUAGE ? 
+                        headline : 
+                        <AutoTranslatedText text={headline} component="span" showLoader={false} />
+                      }
+                    </span>
+                    {index < headlines.length - 1 && ' | '}
+                  </React.Fragment>
+                ))
+              : <AutoTranslatedText text="Loading headlines..." component="span" />}
           </marquee>
         </div>
       </section>
@@ -100,11 +141,17 @@ const HomeSection = () => {
       <ArticleCreation onArticleCreated={handleArticleCreated} />
 
       {loading ? (
-        <div className="text-center py-4">Loading articles...</div>
+        <div className="text-center py-4">
+          <AutoTranslatedText text="Loading articles..." />
+        </div>
       ) : error ? (
-        <div className="text-red-500 text-center py-4">{error}</div>
+        <div className="text-red-500 text-center py-4">
+          <AutoTranslatedText text={error} />
+        </div>
       ) : articles.length === 0 ? (
-        <div className="text-center py-4">No articles found</div>
+        <div className="text-center py-4">
+          <AutoTranslatedText text="No articles found" />
+        </div>
       ) : (
         <div className="space-y-5">
           {articles.map((article) => (

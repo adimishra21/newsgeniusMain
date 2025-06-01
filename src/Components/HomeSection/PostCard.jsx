@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Avatar, Card, CardContent, CardHeader, CardActions, IconButton, Typography, Menu, MenuItem } from '@mui/material';
+import React, { useState, useEffect, useContext } from 'react';
+import { Avatar, Card, CardContent, CardHeader, CardActions, IconButton, Typography, Menu, MenuItem, Box } from '@mui/material';
 import { FavoriteBorder, Favorite, ChatBubbleOutline, Repeat, Share, MoreHoriz } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { articleAPI, reactionAPI, commentAPI } from '../../config/api.config';
 import ReplyModal from './ReplyModal';
 import { format } from 'date-fns';
+import AutoTranslatedText from '../Common/AutoTranslatedText';
+import { LanguageContext } from '../../utils/contexts';
 
 // Debug helper function to ensure dates are handled safely
 const formatDate = (dateString) => {
@@ -28,6 +30,7 @@ const safeContent = (content) => {
 const PostCard = ({ article }) => {
   // Safety check for article
   const safeArticle = article || {};
+  const { language } = useContext(LanguageContext);
   
   // Log article to help debug
   useEffect(() => {
@@ -198,112 +201,158 @@ const PostCard = ({ article }) => {
       setShowReplyModal(false);
     } catch (err) {
       setError('Failed to add comment');
-      console.error('Comment submission error:', err);
+      console.error('Error adding comment:', err);
     }
   };
+
+  // Get content safely
+  const content = safeContent(safeArticle.content);
+  const userName = safeArticle.user?.name || safeArticle.userName || 'Unknown User';
+  const userImage = safeArticle.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}`;
 
   // If we have an invalid article, render nothing
   if (!safeArticle || typeof safeArticle !== 'object' || !safeArticle.id) {
     console.error('Invalid article data', safeArticle);
-    return <div className="p-4 text-red-500">Error: Invalid article data</div>;
+    return (
+      <Card className="shadow-md rounded-lg overflow-hidden p-4">
+        <Typography color="error">
+          <AutoTranslatedText text="Error: Invalid article data" component="span" />
+        </Typography>
+      </Card>
+    );
   }
 
   return (
-    <Card className="mb-4">
+    <Card className="shadow-md rounded-lg overflow-hidden">
       <CardHeader
         avatar={
-        <Avatar
-            src={safeArticle.user?.image || 'https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_960_720.png'}
-            alt={safeArticle.user?.fullName || 'User'}
+          <Avatar
+            src={userImage}
             onClick={handleProfileClick}
-        className="cursor-pointer" 
+            className="cursor-pointer"
           />
         }
-        title={
-          <Typography variant="h6" className="cursor-pointer hover:underline" onClick={handleProfileClick}>
-            {safeArticle.user?.fullName || safeArticle.author || 'Anonymous'}
-          </Typography>
+        action={
+          <IconButton aria-label="settings" onClick={handleMenuClick}>
+            <MoreHoriz />
+          </IconButton>
         }
-        subheader={formatDate(safeArticle.createdAt)}
+        title={
+          <Box onClick={handleProfileClick} className="cursor-pointer">
+            <AutoTranslatedText 
+              text={userName} 
+              component="span" 
+              typographyProps={{ fontWeight: 'bold' }}
+              showIndicator={false} 
+            />
+          </Box>
+        }
+        subheader={
+          <AutoTranslatedText 
+            text={formatDate(safeArticle.createdAt || safeArticle.updatedAt)} 
+            component="span" 
+            showIndicator={false}
+          />
+        }
       />
       <CardContent onClick={handleArticleClick} className="cursor-pointer">
-        <Typography variant="body1" className="whitespace-pre-wrap">
-          {safeContent(safeArticle.content)}
-        </Typography>
+        <AutoTranslatedText 
+          text={content} 
+          component="body1" 
+          typographyProps={{ paragraph: true }}
+          showIndicator={true}
+        />
         {safeArticle.image && (
-          <img
-            src={safeArticle.image}
-            alt="Article"
-            className="mt-2 rounded-lg max-h-96 w-full object-cover"
+          <img 
+            src={safeArticle.image} 
+            alt="Article" 
+            className="w-full h-auto rounded-md mt-2" 
+            style={{ maxHeight: '300px', objectFit: 'cover' }}
           />
         )}
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton onClick={handleLike} color={liked ? "error" : "default"}>
-          {liked ? <Favorite /> : <FavoriteBorder />}
+        <IconButton aria-label="like" onClick={handleLike}>
+          {liked ? <Favorite style={{ color: 'red' }} /> : <FavoriteBorder />}
         </IconButton>
-        <Typography variant="body2" className="mr-4">
+        <Typography variant="body2" color="text.secondary">
           {likesCount}
         </Typography>
-        <IconButton onClick={handleReply}>
+        <IconButton aria-label="comment" onClick={handleReply}>
           <ChatBubbleOutline />
         </IconButton>
-        <Typography variant="body2" className="mr-4">
+        <Typography variant="body2" color="text.secondary">
           {commentsCount}
         </Typography>
-        <IconButton onClick={handleShare}>
+        <IconButton aria-label="share" onClick={handleShare}>
           <Share />
         </IconButton>
-        {canModifyArticle && (
-           <div>
-            <IconButton onClick={handleMenuClick}>
-              <MoreHoriz />
-            </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={handleDelete}>Delete</MenuItem>
-      </Menu>
-           </div>
-        )}
+        <Typography variant="body2" color="text.secondary">
+          {sharesCount}
+        </Typography>
       </CardActions>
 
       {comments.length > 0 && (
-        <div className="mt-4 space-y-3 px-4 pb-4">
-          <h4 className="font-semibold">Comments</h4>
-          {comments.map((comment) => {
-            // Extra safety check for comment content
-            const commentContent = typeof comment.content === 'string' 
-              ? comment.content 
-              : (comment.content && typeof comment.content === 'object' && comment.content.content) 
-                ? comment.content.content
-                : 'Comment';
-              
-            return (
-              <div key={comment.id || Math.random()} className="bg-gray-50 p-3 rounded">
-                <div className="flex items-center space-x-2 mb-1">
-                  <Avatar src={comment.userAvatar} sx={{ width: 24, height: 24 }} />
-                  <span className="font-medium text-sm">{comment.userName || 'User'}</span>
-                  <span className="text-gray-500 text-xs">
-                    {comment.createdAt ? format(new Date(comment.createdAt), 'MMM d, yyyy') : 'Just now'}
-                  </span>
-                </div>
-                <p className="text-gray-800 text-sm">
-                  {commentContent}
-                </p>
-                </div>
-            );
-          })}
-        </div>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            <AutoTranslatedText text="Comments" component="span" />
+          </Typography>
+          {comments.map((comment, index) => (
+            <Box key={comment.id || index} sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <Avatar
+                src={comment.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user?.name || 'User')}`}
+                sx={{ width: 32, height: 32 }}
+              />
+              <Box>
+                <Typography variant="subtitle2">
+                  <AutoTranslatedText 
+                    text={comment.user?.name || 'User'} 
+                    component="span" 
+                    showIndicator={false}
+                  />
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <AutoTranslatedText 
+                    text={comment.content} 
+                    component="span" 
+                    showIndicator={true}
+                  />
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </CardContent>
       )}
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        {canModifyArticle && (
+          <MenuItem onClick={handleDelete}>
+            <AutoTranslatedText text="Delete" component="span" />
+          </MenuItem>
+        )}
+        <MenuItem onClick={handleMenuClose}>
+          <AutoTranslatedText text="Cancel" component="span" />
+        </MenuItem>
+      </Menu>
 
       <ReplyModal
         open={showReplyModal}
         onClose={() => setShowReplyModal(false)}
         onSubmit={onCommentSubmit}
+        title={<AutoTranslatedText text="Add a comment" component="span" />}
       />
+      
+      {error && (
+        <CardContent>
+          <Typography color="error">
+            <AutoTranslatedText text={error} component="span" />
+          </Typography>
+        </CardContent>
+      )}
     </Card>
   );
 };

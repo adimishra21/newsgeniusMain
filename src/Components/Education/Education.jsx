@@ -3,15 +3,23 @@ import { Grid, Typography, Card, CardContent, CardMedia, Box, Tabs, Tab, Circula
 import Navigation from '../Navigation/Navigation';
 import RightPart from '../RightPart/RightPart';
 import Ticker from '../Ticker/Ticker';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { 
+  getEducationNews, 
+  getUniversitiesNews, 
+  getSchoolsNews, 
+  getJobMarketNews, 
+  getFeaturedEducationNews 
+} from '../../utils/educationAPI';
 
 const Education = ({ theme, toggleTheme }) => {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [educationNews, setEducationNews] = useState([]);
   const [higherEducation, setHigherEducation] = useState([]);
   const [schoolEducation, setSchoolEducation] = useState([]);
-  const [entranceExams, setEntranceExams] = useState([]);
+  const [jobMarket, setJobMarket] = useState([]);
   const [error, setError] = useState(null);
   const [featuredNews, setFeaturedNews] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -20,7 +28,7 @@ const Education = ({ theme, toggleTheme }) => {
     { label: 'Education News', value: 'education' },
     { label: 'Higher Education', value: 'higher' },
     { label: 'School Education', value: 'school' },
-    { label: 'Entrance Exams', value: 'exams' }
+    { label: 'Job Market', value: 'jobs' }
   ];
 
   // Function to get education-related image
@@ -29,101 +37,9 @@ const Education = ({ theme, toggleTheme }) => {
       'education': '/images/education/education.jpg',
       'higher': '/images/education/higher.jpg',
       'school': '/images/education/school.jpg',
-      'exams': '/images/education/exams.jpg'
+      'jobs': '/images/education/jobs.jpg'
     };
     return images[category] || '/images/education/default.jpg';
-  };
-
-  // Function to fetch education news
-  const fetchEducationNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=education+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'education',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getEducationImage('education')
-      }));
-      setEducationNews(news);
-    } catch (error) {
-      console.error('Error fetching education news:', error);
-      setError('Failed to fetch education news');
-    }
-  };
-
-  // Function to fetch higher education news
-  const fetchHigherEducationNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=higher+education+universities+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'higher',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getEducationImage('higher')
-      }));
-      setHigherEducation(news);
-    } catch (error) {
-      console.error('Error fetching higher education news:', error);
-      setError('Failed to fetch higher education news');
-    }
-  };
-
-  // Function to fetch school education news
-  const fetchSchoolEducationNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=school+education+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'school',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getEducationImage('school')
-      }));
-      setSchoolEducation(news);
-    } catch (error) {
-      console.error('Error fetching school education news:', error);
-      setError('Failed to fetch school education news');
-    }
-  };
-
-  // Function to fetch entrance exams news
-  const fetchEntranceExamsNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=entrance+exams+jee+neet+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'exams',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getEducationImage('exams')
-      }));
-      setEntranceExams(news);
-    } catch (error) {
-      console.error('Error fetching entrance exams news:', error);
-      setError('Failed to fetch entrance exams news');
-    }
-  };
-
-  // Function to fetch featured education news
-  const fetchFeaturedNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=education+india&sortBy=publishedAt&language=en&pageSize=5&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const featured = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        image: item.urlToImage || getEducationImage('education')
-      }));
-      setFeaturedNews(featured);
-    } catch (error) {
-      console.error('Error fetching featured news:', error);
-    }
   };
 
   // Fetch all data when component mounts
@@ -131,16 +47,31 @@ const Education = ({ theme, toggleTheme }) => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        await Promise.all([
-          fetchEducationNews(),
-          fetchHigherEducationNews(),
-          fetchSchoolEducationNews(),
-          fetchEntranceExamsNews(),
-          fetchFeaturedNews()
+        // Fetch all data concurrently for better performance
+        const [
+          educationData,
+          universitiesData,
+          schoolsData,
+          jobsData,
+          featuredData
+        ] = await Promise.all([
+          getEducationNews(),
+          getUniversitiesNews(),
+          getSchoolsNews(),
+          getJobMarketNews(),
+          getFeaturedEducationNews()
         ]);
+        
+        // Update state with fetched data
+        setEducationNews(educationData);
+        setHigherEducation(universitiesData);
+        setSchoolEducation(schoolsData);
+        setJobMarket(jobsData);
+        setFeaturedNews(featuredData);
+        setError(null);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setError('Failed to fetch data');
+        setError('Failed to fetch data. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -174,8 +105,10 @@ const Education = ({ theme, toggleTheme }) => {
             height: '400px',
             position: 'relative',
             overflow: 'hidden',
-            borderRadius: 2
+            borderRadius: 2,
+            cursor: 'pointer'
           }}
+          onClick={() => navigate(`/education/details/${encodeURIComponent(featuredNews[currentSlide]?.id)}/education`)}
         >
           <CardMedia
             component="img"
@@ -240,150 +173,51 @@ const Education = ({ theme, toggleTheme }) => {
       );
     }
 
+    let newsToShow = [];
     switch (selectedTab) {
       case 0:
-        return (
-          <Box sx={{ mb: 4 }}>
-            {renderSlideshow()}
-            <Typography variant="h5" gutterBottom>
-              Latest Education News
-            </Typography>
-            {educationNews.map((news) => (
-              <Card 
-                key={news.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={news.image}
-                  alt={news.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {news.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
+        newsToShow = educationNews;
+        break;
       case 1:
-        return (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              Higher Education News
-            </Typography>
-            {higherEducation.map((news) => (
-              <Card 
-                key={news.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={news.image}
-                  alt={news.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {news.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
+        newsToShow = higherEducation;
+        break;
       case 2:
-        return (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              School Education News
-            </Typography>
-            {schoolEducation.map((news) => (
-              <Card 
-                key={news.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={news.image}
-                  alt={news.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {news.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
+        newsToShow = schoolEducation;
+        break;
       case 3:
-        return (
-          <Box>
-            <Typography variant="h5" gutterBottom>
-              Entrance Exams News
-            </Typography>
-            {entranceExams.map((news) => (
+        newsToShow = jobMarket;
+        break;
+      default:
+        newsToShow = educationNews;
+    }
+
+    return (
+      <Box>
+        {renderSlideshow()}
+        
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+          {categories[selectedTab].label}
+        </Typography>
+        
+        <Grid container spacing={3}>
+          {newsToShow.map((news) => (
+            <Grid item xs={12} sm={6} md={4} key={news.id}>
               <Card 
-                key={news.id} 
                 sx={{ 
-                  mb: 2,
+                  height: '100%',
+                  cursor: 'pointer',
                   transition: 'transform 0.2s',
                   '&:hover': {
-                    transform: 'scale(1.02)',
+                    transform: 'scale(1.03)',
                     boxShadow: 3
                   }
                 }}
+                onClick={() => navigate(`/education/details/${encodeURIComponent(news.id)}/education`)}
               >
                 <CardMedia
                   component="img"
-                  height="200"
-                  image={news.image}
+                  height="180"
+                  image={news.image || getEducationImage(news.category)}
                   alt={news.title}
                   sx={{ objectFit: 'cover' }}
                 />
@@ -391,20 +225,34 @@ const Education = ({ theme, toggleTheme }) => {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                     {news.title}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {news.description?.length > 120 ? 
+                      `${news.description.substring(0, 120)}...` : 
+                      news.description}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        bgcolor: theme === 'light' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)', 
+                        px: 1, 
+                        py: 0.5, 
+                        borderRadius: 1 
+                      }}
+                    >
+                      {news.category}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {news.date}
+                    </Typography>
+                  </Box>
                 </CardContent>
               </Card>
-            ))}
-          </Box>
-        );
-      default:
-        return null;
-    }
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
   };
 
   return (

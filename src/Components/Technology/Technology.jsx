@@ -3,9 +3,17 @@ import { Grid, Typography, Card, CardContent, CardMedia, Box, Tabs, Tab, Circula
 import Navigation from '../Navigation/Navigation';
 import RightPart from '../RightPart/RightPart';
 import Ticker from '../Ticker/Ticker';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { 
+  getTechNews, 
+  getAiNews, 
+  getGadgetsNews, 
+  getStartupsNews, 
+  getFeaturedTechNews 
+} from '../../utils/technologyAPI';
 
 const Technology = ({ theme, toggleTheme }) => {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [techNews, setTechNews] = useState([]);
@@ -34,113 +42,36 @@ const Technology = ({ theme, toggleTheme }) => {
     return images[category] || '/images/technology/default.jpg';
   };
 
-  // Function to fetch technology news
-  const fetchTechNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&category=technology&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'tech',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getTechImage('tech')
-      }));
-      setTechNews(news);
-    } catch (error) {
-      console.error('Error fetching technology news:', error);
-      setError('Failed to fetch technology news');
-    }
-  };
-
-  // Function to fetch AI news
-  const fetchAiNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=artificial+intelligence+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'ai',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getTechImage('ai')
-      }));
-      setAiNews(news);
-    } catch (error) {
-      console.error('Error fetching AI news:', error);
-      setError('Failed to fetch AI news');
-    }
-  };
-
-  // Function to fetch gadgets news
-  const fetchGadgetsNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=gadgets+technology+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'gadgets',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getTechImage('gadgets')
-      }));
-      setGadgets(news);
-    } catch (error) {
-      console.error('Error fetching gadgets news:', error);
-      setError('Failed to fetch gadgets news');
-    }
-  };
-
-  // Function to fetch startups news
-  const fetchStartupsNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=tech+startups+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'startups',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getTechImage('startups')
-      }));
-      setStartups(news);
-    } catch (error) {
-      console.error('Error fetching startups news:', error);
-      setError('Failed to fetch startups news');
-    }
-  };
-
-  // Function to fetch featured technology news
-  const fetchFeaturedNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&category=technology&pageSize=5&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const featured = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        image: item.urlToImage || getTechImage('tech')
-      }));
-      setFeaturedNews(featured);
-    } catch (error) {
-      console.error('Error fetching featured news:', error);
-    }
-  };
-
   // Fetch all data when component mounts
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        await Promise.all([
-          fetchTechNews(),
-          fetchAiNews(),
-          fetchGadgetsNews(),
-          fetchStartupsNews(),
-          fetchFeaturedNews()
+        // Fetch all data concurrently for better performance
+        const [
+          techData,
+          aiData,
+          gadgetsData,
+          startupsData,
+          featuredData
+        ] = await Promise.all([
+          getTechNews(),
+          getAiNews(),
+          getGadgetsNews(),
+          getStartupsNews(),
+          getFeaturedTechNews()
         ]);
+        
+        // Update state with fetched data
+        setTechNews(techData);
+        setAiNews(aiData);
+        setGadgets(gadgetsData);
+        setStartups(startupsData);
+        setFeaturedNews(featuredData);
+        setError(null);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setError('Failed to fetch data');
+        setError('Failed to fetch data. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -174,8 +105,10 @@ const Technology = ({ theme, toggleTheme }) => {
             height: '400px',
             position: 'relative',
             overflow: 'hidden',
-            borderRadius: 2
+            borderRadius: 2,
+            cursor: 'pointer'
           }}
+          onClick={() => navigate(`/technology/details/${encodeURIComponent(featuredNews[currentSlide]?.id)}/technology`)}
         >
           <CardMedia
             component="img"
@@ -240,150 +173,51 @@ const Technology = ({ theme, toggleTheme }) => {
       );
     }
 
+    let newsToShow = [];
     switch (selectedTab) {
       case 0:
-        return (
-          <Box sx={{ mb: 4 }}>
-            {renderSlideshow()}
-            <Typography variant="h5" gutterBottom>
-              Latest Technology News
-            </Typography>
-            {techNews.map((news) => (
-              <Card 
-                key={news.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={news.image}
-                  alt={news.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {news.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
+        newsToShow = techNews;
+        break;
       case 1:
-        return (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              Artificial Intelligence News
-            </Typography>
-            {aiNews.map((news) => (
-              <Card 
-                key={news.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={news.image}
-                  alt={news.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {news.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
+        newsToShow = aiNews;
+        break;
       case 2:
-        return (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              Latest Gadgets
-            </Typography>
-            {gadgets.map((news) => (
-              <Card 
-                key={news.id} 
-                sx={{ 
-                  mb: 2,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: 3
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={news.image}
-                  alt={news.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {news.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
+        newsToShow = gadgets;
+        break;
       case 3:
-        return (
-          <Box>
-            <Typography variant="h5" gutterBottom>
-              Tech Startups
-            </Typography>
-            {startups.map((news) => (
+        newsToShow = startups;
+        break;
+      default:
+        newsToShow = techNews;
+    }
+
+    return (
+      <Box>
+        {renderSlideshow()}
+        
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+          {categories[selectedTab].label}
+        </Typography>
+        
+        <Grid container spacing={3}>
+          {newsToShow.map((news) => (
+            <Grid item xs={12} sm={6} md={4} key={news.id}>
               <Card 
-                key={news.id} 
                 sx={{ 
-                  mb: 2,
+                  height: '100%',
+                  cursor: 'pointer',
                   transition: 'transform 0.2s',
                   '&:hover': {
-                    transform: 'scale(1.02)',
+                    transform: 'scale(1.03)',
                     boxShadow: 3
                   }
                 }}
+                onClick={() => navigate(`/technology/details/${encodeURIComponent(news.id)}/technology`)}
               >
                 <CardMedia
                   component="img"
-                  height="200"
-                  image={news.image}
+                  height="180"
+                  image={news.image || getTechImage(news.category)}
                   alt={news.title}
                   sx={{ objectFit: 'cover' }}
                 />
@@ -391,20 +225,34 @@ const Technology = ({ theme, toggleTheme }) => {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                     {news.title}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {news.description}
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {news.description?.length > 120 ? 
+                      `${news.description.substring(0, 120)}...` : 
+                      news.description}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {news.date}
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        bgcolor: theme === 'light' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)', 
+                        px: 1, 
+                        py: 0.5, 
+                        borderRadius: 1 
+                      }}
+                    >
+                      {news.category}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {news.date}
+                    </Typography>
+                  </Box>
                 </CardContent>
               </Card>
-            ))}
-          </Box>
-        );
-      default:
-        return null;
-    }
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
   };
 
   return (

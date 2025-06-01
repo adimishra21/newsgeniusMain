@@ -1,36 +1,4 @@
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-import axios from 'axios';
-import { Box, Typography, CircularProgress, Alert, Grid } from '@mui/material';
-
-const FuelUpdates = () => {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `https://newsapi.org/v2/everything?q=fuel+price+india&language=en&sortBy=publishedAt&apiKey=9e76e457ea734bd79ae1f3b784796948`
-        );
-        setNews(response.data.articles.slice(0, 6)); // Limit to 6 articles
-      } catch (error) {
-        console.error('Error fetching fuel news:', error);
-        setError('Failed to load fuel updates');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNews();
-  }, []);
-
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" mt={4}>
-=======
 import { 
   Box, 
   Typography, 
@@ -115,7 +83,6 @@ const FuelUpdates = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
         <CircularProgress />
       </Box>
     );
@@ -123,72 +90,12 @@ const FuelUpdates = () => {
 
   if (error) {
     return (
-<<<<<<< HEAD
-      <Alert severity="error" sx={{ mt: 2 }}>
-=======
       <Alert severity="error" sx={{ mb: 2 }}>
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
         {error}
       </Alert>
     );
   }
 
-<<<<<<< HEAD
-  return (
-    <Box sx={{ width: '100%', mt: 2 }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Fuel Updates
-      </Typography>
-      <Grid container spacing={2}>
-        {news.map((article) => (
-          <Grid item xs={12} key={article.url}>
-            <Box
-              sx={{
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                display: 'flex',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'scale(1.02)',
-                  boxShadow: 3
-                }
-              }}
-              onClick={() => window.open(article.url, '_blank')}
-            >
-              <Box sx={{ width: '120px', height: '120px', flexShrink: 0 }}>
-                <img
-                  src={article.urlToImage || '/logo.jpg'}
-                  alt={article.title}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-              </Box>
-              <Box sx={{ p: 2, flexGrow: 1 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                  {article.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {article.description}
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="caption" color="text.secondary">
-                    {article.source.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {new Date(article.publishedAt).toLocaleDateString()}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
-=======
   const states = Object.keys(fuelData || {});
   const currentPrices = fuelData[selectedState];
   const petrolChange = getPriceChange(currentPrices.petrol, lastPrices, 'petrol');
@@ -252,14 +159,13 @@ const FuelUpdates = () => {
                 {petrolChange && (
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                     {petrolChange.increased ? (
-                      <TrendingUpIcon color="error" fontSize="small" />
+                      <TrendingUpIcon color="error" fontSize="small" sx={{ mr: 0.5 }} />
                     ) : (
-                      <TrendingDownIcon color="success" fontSize="small" />
+                      <TrendingDownIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
                     )}
-                    <Typography 
-                      variant="body2" 
+                    <Typography
+                      variant="body2"
                       color={petrolChange.increased ? 'error' : 'success'}
-                      sx={{ ml: 0.5 }}
                     >
                       {petrolChange.increased ? '+' : ''}{petrolChange.diff}
                     </Typography>
@@ -274,14 +180,13 @@ const FuelUpdates = () => {
                 {dieselChange && (
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                     {dieselChange.increased ? (
-                      <TrendingUpIcon color="error" fontSize="small" />
+                      <TrendingUpIcon color="error" fontSize="small" sx={{ mr: 0.5 }} />
                     ) : (
-                      <TrendingDownIcon color="success" fontSize="small" />
+                      <TrendingDownIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
                     )}
-                    <Typography 
-                      variant="body2" 
+                    <Typography
+                      variant="body2"
                       color={dieselChange.increased ? 'error' : 'success'}
-                      sx={{ ml: 0.5 }}
                     >
                       {dieselChange.increased ? '+' : ''}{dieselChange.diff}
                     </Typography>
@@ -293,16 +198,11 @@ const FuelUpdates = () => {
         </Table>
       </TableContainer>
 
-      <Typography variant="caption" color="text.secondary">
-        Last Updated: {currentPrices.lastUpdated}
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'right' }}>
+        Last updated: {new Date().toLocaleString()}
       </Typography>
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
     </Box>
   );
 };
 
-<<<<<<< HEAD
 export default FuelUpdates;
-=======
-export default FuelUpdates; 
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e

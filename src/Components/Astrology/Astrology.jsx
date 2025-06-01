@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Card, CardContent, CardMedia, Box, Tabs, Tab, Chip, Stack, CircularProgress, Divider } from '@mui/material';
+import { Grid, Typography, Card, CardContent, CardMedia, Box, Tabs, Tab, Chip, Stack, Divider } from '@mui/material';
 import Navigation from '../Navigation/Navigation';
 import RightPart from '../RightPart/RightPart';
 import Ticker from '../Ticker/Ticker';
-import axios from 'axios';
+import ErrorDisplay from '../ErrorDisplay';
+import LoadingSpinner from '../LoadingSpinner';
+import { 
+  getAstrologyNews, 
+  getHoroscopes, 
+  getZodiacSigns, 
+  getNumerology, 
+  getTarotReadings, 
+  getRemedies, 
+  getVedicAstrology, 
+  getFeaturedAstrologyNews 
+} from '../../utils/astrologyAPI';
 
 const Astrology = ({ theme, toggleTheme }) => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -114,98 +125,6 @@ const Astrology = ({ theme, toggleTheme }) => {
     setVedicAstrology([vedic]);
   };
 
-  // Function to fetch astrology news
-  const fetchAstrologyNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=astrology+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'astrology',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getAstrologyImage('astrology')
-      }));
-      setAstrologyNews(news);
-    } catch (error) {
-      console.error('Error fetching astrology news:', error);
-      setError('Failed to fetch astrology news');
-    }
-  };
-
-  // Function to fetch horoscopes news
-  const fetchHoroscopesNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=daily+horoscope+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'horoscopes',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getAstrologyImage('horoscopes')
-      }));
-      setHoroscopes(news);
-    } catch (error) {
-      console.error('Error fetching horoscopes news:', error);
-      setError('Failed to fetch horoscopes news');
-    }
-  };
-
-  // Function to fetch zodiac signs news
-  const fetchZodiacSignsNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=zodiac+signs+astrology+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'zodiac',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getAstrologyImage('zodiac')
-      }));
-      setZodiacSigns(news);
-    } catch (error) {
-      console.error('Error fetching zodiac signs news:', error);
-      setError('Failed to fetch zodiac signs news');
-    }
-  };
-
-  // Function to fetch numerology news
-  const fetchNumerologyNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=numerology+astrology+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const news = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        category: 'numerology',
-        date: new Date(item.publishedAt).toLocaleDateString(),
-        image: item.urlToImage || getAstrologyImage('numerology')
-      }));
-      setNumerology(news);
-    } catch (error) {
-      console.error('Error fetching numerology news:', error);
-      setError('Failed to fetch numerology news');
-    }
-  };
-
-  // Function to fetch featured astrology news
-  const fetchFeaturedNews = async () => {
-    try {
-      const response = await axios.get(`https://newsapi.org/v2/everything?q=astrology+india&sortBy=publishedAt&language=en&pageSize=5&apiKey=9e76e457ea734bd79ae1f3b784796948`);
-      const featured = response.data.articles.map(item => ({
-        id: item.url,
-        title: item.title,
-        description: item.description,
-        image: item.urlToImage || getAstrologyImage('astrology')
-      }));
-      setFeaturedNews(featured);
-    } catch (error) {
-      console.error('Error fetching featured news:', error);
-    }
-  };
-
   // Fetch all data when component mounts
   useEffect(() => {
     const fetchAllData = async () => {
@@ -216,15 +135,16 @@ const Astrology = ({ theme, toggleTheme }) => {
         fetchRemedies();
         fetchVedicAstrology();
         await Promise.all([
-          fetchAstrologyNews(),
-          fetchHoroscopesNews(),
-          fetchZodiacSignsNews(),
-          fetchNumerologyNews(),
-          fetchFeaturedNews()
+          getAstrologyNews().then(news => setAstrologyNews(news)),
+          getHoroscopes().then(news => setHoroscopes(news)),
+          getZodiacSigns().then(news => setZodiacSigns(news)),
+          getNumerology().then(news => setNumerology(news)),
+          getFeaturedAstrologyNews().then(news => setFeaturedNews(news))
         ]);
+        setError(null);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setError('Failed to fetch data');
+        setError('Failed to fetch astrology data. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -249,19 +169,11 @@ const Astrology = ({ theme, toggleTheme }) => {
 
   const renderContent = () => {
     if (loading) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-          <CircularProgress />
-        </Box>
-      );
+      return <LoadingSpinner />;
     }
 
     if (error) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-          <Typography color="error">{error}</Typography>
-        </Box>
-      );
+      return <ErrorDisplay message={error} onRetry={() => window.location.reload()} />;
     }
 
     switch (selectedTab) {

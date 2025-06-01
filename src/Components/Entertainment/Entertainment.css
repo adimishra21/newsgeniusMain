@@ -1,50 +1,27 @@
-<<<<<<< HEAD
-/* Entertainment Section Styles */
+/* Entertainment styles */
 
-/* Ticker Animation */
 .ticker-wrap {
   width: 100%;
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.8);
-  padding: 10px 0;
-=======
-/* Entertainment page styles */
-
-/* Ticker styles */
-.ticker-wrap {
-  width: 100%;
-  overflow: hidden;
-  height: 2.5rem;
-  background-color: transparent;
+  height: 30px;
   padding: 0;
   margin: 0;
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
-  position: relative;
 }
 
 .ticker {
   display: inline-block;
   white-space: nowrap;
-<<<<<<< HEAD
   padding-right: 100%;
-=======
-  padding-right: 100%; /* Ensure the content loops */
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-  animation-name: ticker;
-  animation-duration: 60s;
+  animation: ticker 25s linear infinite;
 }
 
 .ticker-item {
   display: inline-block;
-  padding: 0 2rem;
-<<<<<<< HEAD
-  color: white;
+  padding: 0 20px;
+  font-size: 14px;
   font-weight: 500;
 }
 
-/* Keyframes for ticker animation */
 @keyframes ticker {
   0% {
     transform: translate3d(0, 0, 0);
@@ -52,100 +29,6 @@
   100% {
     transform: translate3d(-100%, 0, 0);
   }
-}
-
-@-webkit-keyframes ticker {
-  0% {
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    -webkit-transform: translate3d(-100%, 0, 0);
-    transform: translate3d(-100%, 0, 0);
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .ticker {
-    animation-duration: 30s;
-  }
-  
-  .ticker-item {
-    padding: 0 1rem;
-  }
-}
-
-/* Movie Card Hover Effects */
-=======
-  color: #1976d2;
-  font-weight: 600;
-  position: relative;
-}
-
-.ticker-item:after {
-  content: "•";
-  position: absolute;
-  right: 0.75rem;
-}
-
-.ticker-item:last-child:after {
-  display: none;
-}
-
-@keyframes ticker {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-/* Make sure animation works on different browsers */
-@-webkit-keyframes ticker {
-  0% {
-    -webkit-transform: translateX(0);
-    transform: translateX(0);
-  }
-  100% {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
-  }
-}
-
-/* Fix for mobile devices */
-@media (max-width: 768px) {
-  .ticker {
-    animation-duration: 30s; /* Faster on mobile */
-  }
-  
-  .ticker-item {
-    padding: 0 1.5rem;
-  }
-}
-
-/* Hover effects for cards */
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
-.movie-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.movie-card:hover {
-  transform: translateY(-5px);
-<<<<<<< HEAD
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-/* Movie and Series Badges */
-.movie-badge {
-  background-color: #e53935;
-  color: white;
-}
-
-.series-badge {
-  background-color: #3949ab;
-  color: white;
 }
 
 /* Section Divider */
@@ -153,33 +36,4 @@
   height: 1px;
   background-color: rgba(0, 0, 0, 0.12);
   margin: 2rem 0;
-=======
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
-
-/* Movie type badges */
-.movie-badge {
-  background-color: #1976d2;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.series-badge {
-  background-color: #9c27b0;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-/* Section dividers */
-.section-divider {
-  margin: 2rem 0;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(25, 118, 210, 0.3), transparent);
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
-} 

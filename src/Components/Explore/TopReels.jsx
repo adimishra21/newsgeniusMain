@@ -10,7 +10,7 @@ const TopReels = () => {
   useEffect(() => {
     const fetchReels = async () => {
       try {
-        const response = await axios.get(`https://newsapi.org/v2/everything?q=video+india&sortBy=publishedAt&language=en&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+        const response = await axios.get(`https://newsapi.org/v2/everything?q=video+india&sortBy=publishedAt&language=en&apiKey=33b913e452b944178aeade1fdbbe1498`);
         const news = response.data.articles.map(item => ({
           title: item.title,
           description: item.description,

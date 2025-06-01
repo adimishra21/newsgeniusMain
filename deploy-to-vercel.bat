@@ -1,27 +1,33 @@
 @echo off
-echo ===================================================
-echo Deploy NewsGenius to Vercel
-echo ===================================================
+echo ======= DEPLOYING NEWSGENIUS TO VERCEL =======
+echo.
 
-echo Step 1: Making sure Git changes are committed...
-git add package.json vercel.json
-git commit -m "Prepare for Vercel deployment"
-
-echo Step 2: Install Vercel CLI (if not already installed)...
+echo Installing Vercel CLI if not already installed...
 call npm install -g vercel
 
-echo Step 3: Deploy to Vercel...
-echo You will need to:
-echo 1. Log in to Vercel (browser will open)
-echo 2. Link to existing project or create a new one
-echo 3. Confirm deployment settings
+echo.
+echo Installing all dependencies with legacy peer deps...
+call npm install --legacy-peer-deps
 
-call vercel
+echo.
+echo Starting Vercel deployment process...
+echo A browser window will open for login if needed.
+echo.
+echo During the deployment process, you'll need to confirm:
+echo 1. Link to existing project or create a new one
+echo 2. Use default settings? Answer NO to customize
+echo 3. Which settings would you like to override? Select: "buildCommand", "outputDirectory", "framework", "installCommand"
+echo 4. For Build Command, enter: npm run build
+echo 5. For Output Directory, enter: build
+echo 6. For Framework, enter: create-react-app
+echo 7. For Install Command, enter: npm install --legacy-peer-deps
+echo.
 
-echo ===================================================
-echo Deployment process initiated!
-echo ===================================================
-echo If successful, your app will be live on a Vercel URL
-echo You can customize the domain in the Vercel dashboard
-echo ===================================================
+echo Starting direct deployment...
+call vercel --prod
+
+echo.
+echo If the deployment succeeded, your app should now be live on Vercel!
+echo The URL should be displayed in the output above.
+echo.
 pause 

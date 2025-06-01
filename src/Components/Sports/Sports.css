@@ -1,7 +1,11 @@
+/* Sports Component Styles */
+
+/* Headlines Ticker */
 .ticker-wrap {
   width: 100%;
   overflow: hidden;
-  position: relative;
+  padding: 10px 0;
+  box-sizing: border-box;
 }
 
 .ticker {
@@ -10,44 +14,101 @@
   animation: ticker 30s linear infinite;
 }
 
-.ticker:hover {
-  animation-play-state: paused;
-}
-
 .ticker-item {
   display: inline-block;
-  padding: 0 2rem;
-  font-size: 1rem;
-  color: #1976d2;
+  padding: 0 20px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 @keyframes ticker {
   0% {
-    transform: translateX(0);
+    transform: translate3d(100%, 0, 0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  .ticker-item {
-    padding: 0 1rem;
-    font-size: 0.9rem;
-  }
+/* Score Cards */
+.score-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Dark mode styles */
-.dark .ticker-item {
-  color: #90caf9;
+.score-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Card hover effects */
-.news-card:hover,
+/* Match Cards */
+.match-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
 .match-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* News Cards */
+.news-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.news-card__image {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.news-card__content {
+  padding: 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-card__title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.news-card__description {
+  flex-grow: 1;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.news-card__footer {
+  margin-top: 8px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .ticker-item {
+    font-size: 14px;
+    padding: 0 15px;
+  }
+}
+
+/* Dark theme adjustments */
+.dark-theme .news-card__description,
+.dark-theme .news-card__footer {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark-theme .ticker-item {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* Loading animation */

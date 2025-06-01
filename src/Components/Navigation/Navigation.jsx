@@ -3,7 +3,7 @@ import { navigationMenu } from './NavigationMenu';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Button, Menu, MenuItem } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { AuthContext } from '../../App';
+import { AuthContext } from '../../utils/contexts';
 
 const Navigation = () => {
     const [anchorEl, setAnchorEl] = React.useState(null);

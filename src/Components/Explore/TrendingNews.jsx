@@ -10,7 +10,7 @@ const TrendingNews = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&apiKey=9e76e457ea734bd79ae1f3b784796948`);
+        const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=in&apiKey=33b913e452b944178aeade1fdbbe1498`);
         const news = response.data.articles.map(item => ({
           title: item.title,
           description: item.description,

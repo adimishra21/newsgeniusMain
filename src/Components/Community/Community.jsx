@@ -1,53 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-<<<<<<< HEAD
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  TextField,
-  IconButton,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Divider,
-  CircularProgress,
-  Badge,
-  useTheme,
-  useMediaQuery,
-  Tooltip,
-  Menu,
-  MenuItem
-} from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import ImageIcon from '@mui/icons-material/Image';
-import { getChatThreads, getChatMessages, sendMessage, markMessagesAsRead } from '../../utils/chatAPI';
-import { getReporterById, getChannelMemberById } from '../../utils/api';
-import Navigation from '../Navigation/Navigation';
-
-// Common emojis
-const EMOJI_LIST = [
-  '😊', '😂', '😍', '👍', '👋', '🎉', '❤️', '🔥', '👏', '🙏',
-  '😎', '🤔', '😢', '😭', '😡', '😱', '🤣', '😴', '🥳', '🤩',
-  '👌', '✌️', '🤞', '🤝', '👊', '✅', '⭐', '🌟', '💯', '🙌'
-];
-
-const Community = ({ theme }) => {
-  const [chatThreads, setChatThreads] = useState([]);
-  const [selectedThread, setSelectedThread] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [emojiAnchorEl, setEmojiAnchorEl] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = useRef(null);
-=======
 import { 
   Grid, 
   Box, 
@@ -93,13 +44,10 @@ const Community = ({ theme }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showNewChatDialog, setShowNewChatDialog] = useState(false);
   const [newChatRecipient, setNewChatRecipient] = useState('');
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
   const messagesEndRef = useRef(null);
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
 
-<<<<<<< HEAD
-=======
   const [chatThreads, setChatThreads] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -182,7 +130,6 @@ const Community = ({ theme }) => {
     ]
   });
 
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
   // Mock current user for demonstration
   const currentUser = {
     id: 'user5',
@@ -195,19 +142,11 @@ const Community = ({ theme }) => {
   }, [currentUser.id]);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (selectedThread) {
-      fetchMessages();
-      markMessagesAsRead(selectedThread.id, currentUser.id);
-    }
-  }, [selectedThread]);
-=======
     if (selectedChat) {
       fetchMessages();
       markMessagesAsRead(selectedChat, currentUser.id);
     }
   }, [selectedChat]);
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
 
   const fetchChatThreads = async () => {
     try {
@@ -235,11 +174,7 @@ const Community = ({ theme }) => {
 
   const fetchMessages = async () => {
     try {
-<<<<<<< HEAD
-      const messages = await getChatMessages(selectedThread.id);
-=======
       const messages = await getChatMessages(selectedChat);
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
       setMessages(messages);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -247,38 +182,6 @@ const Community = ({ theme }) => {
   };
 
   const handleSendMessage = async () => {
-<<<<<<< HEAD
-    if ((!newMessage.trim() && !selectedFile) || !selectedThread) return;
-
-    setSending(true);
-    try {
-      const otherParticipant = selectedThread.participants.find(p => p.id !== currentUser.id);
-      let messageContent = newMessage;
-      
-      // If there's a file, create a message with the file
-      if (selectedFile) {
-        const fileUrl = URL.createObjectURL(selectedFile);
-        messageContent = {
-          type: selectedFile.type.startsWith('image/') ? 'image' : 'file',
-          content: fileUrl,
-          fileName: selectedFile.name,
-          fileSize: selectedFile.size
-        };
-      }
-
-      const message = await sendMessage(currentUser.id, otherParticipant.id, messageContent);
-      
-      setMessages(prev => [...prev, message]);
-      setNewMessage('');
-      setSelectedFile(null);
-      
-      // Update chat threads with new message
-      setChatThreads(prev => prev.map(thread => 
-        thread.id === selectedThread.id
-          ? {
-              ...thread,
-              lastMessage: typeof messageContent === 'string' ? messageContent : `Sent ${selectedFile.type.startsWith('image/') ? 'an image' : 'a file'}`,
-=======
     if (!newMessage.trim() || !selectedChat) return;
 
     setSending(true);
@@ -295,7 +198,6 @@ const Community = ({ theme }) => {
           ? {
               ...thread,
               lastMessage: message.content,
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
               lastMessageTime: message.timestamp,
               unreadCount: 0
             }
@@ -308,104 +210,6 @@ const Community = ({ theme }) => {
     }
   };
 
-<<<<<<< HEAD
-  const handleEmojiClick = (emoji) => {
-    setNewMessage(prev => prev + emoji);
-    setEmojiAnchorEl(null);
-  };
-
-  const handleEmojiButtonClick = (event) => {
-    setEmojiAnchorEl(event.currentTarget);
-  };
-
-  const handleEmojiMenuClose = () => {
-    setEmojiAnchorEl(null);
-  };
-
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
-
-  const handleFileUploadClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleFileUploadClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleImageUpload = () => {
-    fileInputRef.current.click();
-    handleFileUploadClose();
-  };
-
-  const handleFileUpload = () => {
-    fileInputRef.current.click();
-    handleFileUploadClose();
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const formatMessageTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-=======
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
-
-<<<<<<< HEAD
-  const renderMessageContent = (message) => {
-    if (typeof message.content === 'object') {
-      if (message.content.type === 'image') {
-        return (
-          <Box>
-            <img 
-              src={message.content.content} 
-              alt="Shared" 
-              style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px' }} 
-            />
-            <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-              {message.content.fileName}
-            </Typography>
-          </Box>
-        );
-      } else {
-        return (
-          <Box>
-            <a 
-              href={message.content.content} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{ color: 'inherit', textDecoration: 'none' }}
-            >
-              <Typography variant="body1">
-                📎 {message.content.fileName}
-              </Typography>
-            </a>
-            <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-              {(message.content.fileSize / 1024).toFixed(2)} KB
-            </Typography>
-          </Box>
-        );
-      }
-    }
-    return <Typography variant="body1">{message.content}</Typography>;
-=======
   const handleChatSelect = (chatId) => {
     setSelectedChat(chatId);
     
@@ -479,7 +283,12 @@ const Community = ({ theme }) => {
   const formatMessageTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
   };
 
   if (loading) {
@@ -491,412 +300,295 @@ const Community = ({ theme }) => {
   }
 
   return (
-<<<<<<< HEAD
-    <Grid container xs={12} className={`px-5 lg:px-36 justify-between ${theme}`}>
-      {/* Navigation Section */}
-      <Grid item xs={0} lg={2.5} className="hidden lg:block w-full relative">
-        <Navigation theme={theme} />
+    <Grid container spacing={0} sx={{ height: '100vh' }}>
+      <Grid item xs={12} lg={2.5} sx={{ display: { xs: 'none', lg: 'block' } }}>
+        <Navigation active="communities" theme={theme} />
       </Grid>
 
-      {/* Chat Section */}
-      <Grid item xs={12} lg={9.5} className="w-full relative">
-        <Paper elevation={3} sx={{ height: 'calc(100vh - 100px)', display: 'flex', overflow: 'hidden' }}>
-          {/* Chat Threads List */}
-          <Box sx={{ width: 300, borderRight: 1, borderColor: 'divider', overflow: 'auto' }}>
-            <List>
-              {chatThreads.map((thread) => (
-                <React.Fragment key={thread.id}>
-                  <ListItem
+      <Grid item xs={12} lg={9.5} sx={{ height: '100vh', overflow: 'hidden' }}>
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+            <Typography variant="h5" component="h1" gutterBottom>
+              Community Chat
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Connect with other reporters and news channels
+            </Typography>
+          </Box>
+
+          <Grid container sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            {/* Chat List */}
+            <Grid item xs={12} md={4} sx={{ 
+              borderRight: 1, 
+              borderColor: 'divider',
+              height: '100%',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+                <TextField
+                  fullWidth
+                  placeholder="Search chats..."
+                  variant="outlined"
+                  size="small"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+
+              <List sx={{ flexGrow: 1, overflow: 'auto', pt: 0 }}>
+                {chatList.map((chat) => (
+                  <ListItem 
+                    key={chat.id}
                     button
-                    selected={selectedThread?.id === thread.id}
-                    onClick={() => setSelectedThread(thread)}
+                    selected={selectedChat === chat.id}
+                    onClick={() => setSelectedChat(chat.id)}
+                    sx={{ 
+                      py: 2,
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      '&.Mui-selected': {
+                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                      }
+                    }}
                   >
                     <ListItemAvatar>
                       <Badge
-                        color="primary"
+                        overlap="circular"
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         variant="dot"
-                        invisible={thread.unreadCount === 0}
+                        sx={{
+                          '& .MuiBadge-badge': {
+                            backgroundColor: chat.online ? 'success.main' : 'grey.500',
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%'
+                          }
+                        }}
                       >
-                        <Avatar src={thread.participantDetails?.profileImage}>
-                          {thread.participantDetails?.name?.[0]}
-                        </Avatar>
+                        <Avatar src={chat.avatar} alt={chat.name} />
                       </Badge>
                     </ListItemAvatar>
-                    <ListItemText
-                      primary={thread.participantDetails?.name}
-                      secondary={
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          noWrap
-                        >
-                          {thread.lastMessage}
-                        </Typography>
-                      }
+                    <ListItemText 
+                      primary={chat.name}
+                      secondary={chat.lastMessage}
+                      primaryTypographyProps={{
+                        fontWeight: chat.unread > 0 ? 'bold' : 'normal'
+                      }}
+                      secondaryTypographyProps={{
+                        noWrap: true,
+                        fontWeight: chat.unread > 0 ? 'bold' : 'normal'
+                      }}
                     />
-                    <Typography variant="caption" color="text.secondary">
-                      {formatMessageTime(thread.lastMessageTime)}
-                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', ml: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
+                        {chat.time}
+                      </Typography>
+                      {chat.unread > 0 && (
+                        <Badge badgeContent={chat.unread} color="primary" />
+                      )}
+                    </Box>
                   </ListItem>
-                  <Divider />
-                </React.Fragment>
-              ))}
-            </List>
-          </Box>
+                ))}
+              </List>
 
-          {/* Chat Messages Area */}
-          <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-            {selectedThread ? (
-              <>
-                {/* Chat Header */}
-                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                  <Typography variant="h6">
-                    {selectedThread.participantDetails?.name}
-                  </Typography>
-                </Box>
+              <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', textAlign: 'center' }}>
+                <Fab 
+                  size="small" 
+                  color="primary" 
+                  onClick={() => setShowNewChatDialog(true)}
+                  sx={{ boxShadow: 2 }}
+                >
+                  <AddIcon />
+                </Fab>
+              </Box>
+            </Grid>
 
-                {/* Messages */}
-                <Box
-                  sx={{
-                    flex: 1,
+            {/* Chat Messages */}
+            <Grid item xs={12} md={8} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              {selectedChat ? (
+                <>
+                  {/* Chat Header */}
+                  <Box sx={{ 
+                    p: 2, 
+                    borderBottom: 1, 
+                    borderColor: 'divider',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        variant="dot"
+                        sx={{
+                          '& .MuiBadge-badge': {
+                            backgroundColor: chatList.find(c => c.id === selectedChat)?.online ? 'success.main' : 'grey.500',
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%'
+                          }
+                        }}
+                      >
+                        <Avatar 
+                          src={chatList.find(c => c.id === selectedChat)?.avatar} 
+                          alt={chatList.find(c => c.id === selectedChat)?.name}
+                        />
+                      </Badge>
+                      <Box sx={{ ml: 2 }}>
+                        <Typography variant="subtitle1" fontWeight="medium">
+                          {chatList.find(c => c.id === selectedChat)?.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {chatList.find(c => c.id === selectedChat)?.online ? 'Online' : 'Offline'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <IconButton onClick={handleMenuOpen}>
+                      <MoreVertIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                    >
+                      <MenuItem onClick={handleMenuClose}>View Profile</MenuItem>
+                      <MenuItem onClick={handleMenuClose}>Mute Notifications</MenuItem>
+                      <MenuItem onClick={handleMenuClose}>Clear Chat</MenuItem>
+                    </Menu>
+                  </Box>
+
+                  {/* Messages */}
+                  <Box sx={{ 
+                    flexGrow: 1, 
                     overflow: 'auto',
                     p: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 2
-                  }}
-                >
-                  {messages.map((message) => (
-                    <Box
-                      key={message.id}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: message.senderId === currentUser.id ? 'flex-end' : 'flex-start',
-                        mb: 1
-                      }}
-                    >
-                      <Paper
+                    bgcolor: theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)'
+                  }}>
+                    {chatMessages[selectedChat].map((msg) => (
+                      <Box
+                        key={msg.id}
                         sx={{
-                          p: 1.5,
-                          maxWidth: '70%',
-                          backgroundColor: message.senderId === currentUser.id
-                            ? 'primary.main'
-                            : 'background.paper',
-                          color: message.senderId === currentUser.id
-                            ? 'primary.contrastText'
-                            : 'text.primary'
+                          display: 'flex',
+                          justifyContent: msg.sender === 'me' ? 'flex-end' : 'flex-start',
+                          mb: 2
                         }}
                       >
-                        {renderMessageContent(message)}
-                        <Typography
-                          variant="caption"
+                        <Paper
+                          elevation={0}
                           sx={{
-                            display: 'block',
-                            textAlign: 'right',
-                            mt: 0.5,
-                            opacity: 0.7
+                            p: 2,
+                            maxWidth: '70%',
+                            borderRadius: 2,
+                            bgcolor: msg.sender === 'me' 
+                              ? 'primary.main' 
+                              : theme === 'dark' ? 'grey.800' : 'grey.100',
+                            color: msg.sender === 'me' ? 'white' : 'text.primary'
                           }}
                         >
-                          {formatMessageTime(message.timestamp)}
-                        </Typography>
-                      </Paper>
-                    </Box>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </Box>
-
-                {/* Message Input */}
-                <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-                  <Grid container spacing={1} alignItems="center">
-                    <Grid item>
-                      <Tooltip title="Add emoji">
-                        <IconButton
-                          onClick={handleEmojiButtonClick}
-                          color="primary"
-                        >
-                          <EmojiEmotionsIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Grid>
-                    <Grid item>
-                      <Tooltip title="Attach file">
-                        <IconButton
-                          onClick={handleFileUploadClick}
-                          color="primary"
-                        >
-                          <AttachFileIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Grid>
-                    <Grid item>
-                      <Tooltip title="Send image">
-                        <IconButton
-                          onClick={handleImageUpload}
-                          color="primary"
-                        >
-                          <ImageIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Grid>
-                    <Grid item xs>
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        placeholder="Type a message..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        disabled={sending}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <IconButton
-                        color="primary"
-                        onClick={handleSendMessage}
-                        disabled={(!newMessage.trim() && !selectedFile) || sending}
-                      >
-                        <SendIcon />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-
-                  {/* Custom Emoji Picker Menu */}
-                  <Menu
-                    anchorEl={emojiAnchorEl}
-                    open={Boolean(emojiAnchorEl)}
-                    onClose={handleEmojiMenuClose}
-                    PaperProps={{
-                      sx: {
-                        maxHeight: 300,
-                        width: 280,
-                      },
-                    }}
-                  >
-                    <Box sx={{ p: 1 }}>
-                      <Grid container spacing={1}>
-                        {EMOJI_LIST.map((emoji, index) => (
-                          <Grid item key={index}>
-                            <IconButton
-                              onClick={() => handleEmojiClick(emoji)}
-                              sx={{ fontSize: '1.5rem', padding: '8px' }}
-                            >
-                              {emoji}
-                            </IconButton>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </Box>
-                  </Menu>
-
-                  {/* File Upload Menu */}
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleFileUploadClose}
-                  >
-                    <MenuItem onClick={handleImageUpload}>
-                      <ImageIcon sx={{ mr: 1 }} /> Send Image
-                    </MenuItem>
-                    <MenuItem onClick={handleFileUpload}>
-                      <AttachFileIcon sx={{ mr: 1 }} /> Send File
-                    </MenuItem>
-                  </Menu>
-
-                  {/* Hidden file input */}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileSelect}
-                    accept="image/*,.pdf,.doc,.docx,.txt"
-                  />
-
-                  {/* Selected file preview */}
-                  {selectedFile && (
-                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">
-                        Selected: {selectedFile.name}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => setSelectedFile(null)}
-                        sx={{ ml: 'auto' }}
-                      >
-                        ×
-                      </IconButton>
-                    </Box>
-                  )}
-                </Box>
-              </>
-            ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%'
-                }}
-              >
-                <Typography variant="h6" color="text.secondary">
-                  Select a conversation to start chatting
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </Paper>
-      </Grid>
-    </Grid>
-=======
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Grid container sx={{ flex: 1, overflow: 'hidden' }}>
-        {/* Chat Threads List */}
-        <Grid item xs={12} md={4} sx={{ borderRight: 1, borderColor: 'divider', overflow: 'auto' }}>
-          <List>
-            {chatThreads.map((thread) => (
-              <React.Fragment key={thread.id}>
-                <ListItem
-                  button
-                  selected={selectedChat === thread.id}
-                  onClick={() => handleChatSelect(thread.id)}
-                >
-                  <ListItemAvatar>
-                    <Badge
-                      color="primary"
-                      variant="dot"
-                      invisible={thread.unreadCount === 0}
-                    >
-                      <Avatar src={thread.participantDetails?.profileImage}>
-                        {thread.participantDetails?.name?.[0]}
-                      </Avatar>
-                    </Badge>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={thread.participantDetails?.name}
-                    secondary={
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        noWrap
-                      >
-                        {thread.lastMessage}
-                      </Typography>
-                    }
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    {formatMessageTime(thread.lastMessageTime)}
-                  </Typography>
-                </ListItem>
-                <Divider />
-              </React.Fragment>
-            ))}
-          </List>
-        </Grid>
-
-        {/* Chat Messages Area */}
-        <Grid item xs={12} md={8} sx={{ display: 'flex', flexDirection: 'column' }}>
-          {selectedChat ? (
-            <>
-              {/* Chat Header */}
-              <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                <Typography variant="h6">
-                  {chatThreads.find(t => t.id === selectedChat)?.participantDetails?.name}
-                </Typography>
-              </Box>
-
-              {/* Messages */}
-              <Box
-                sx={{
-                  flex: 1,
-                  overflow: 'auto',
-                  p: 2,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 2
-                }}
-              >
-                {messages.map((message) => (
-                  <Box
-                    key={message.id}
-                    sx={{
-                      display: 'flex',
-                      justifyContent: message.senderId === currentUser.id ? 'flex-end' : 'flex-start',
-                      mb: 1
-                    }}
-                  >
-                    <Paper
-                      sx={{
-                        p: 1.5,
-                        maxWidth: '70%',
-                        backgroundColor: message.senderId === currentUser.id
-                          ? 'primary.main'
-                          : 'background.paper',
-                        color: message.senderId === currentUser.id
-                          ? 'primary.contrastText'
-                          : 'text.primary'
-                      }}
-                    >
-                      <Typography variant="body1">{message.content}</Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: 'block',
-                          textAlign: 'right',
-                          mt: 0.5,
-                          opacity: 0.7
-                        }}
-                      >
-                        {formatMessageTime(message.timestamp)}
-                      </Typography>
-                    </Paper>
+                          <Typography variant="body1">{msg.text}</Typography>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'flex-end', 
+                            alignItems: 'center',
+                            mt: 0.5,
+                            gap: 0.5 
+                          }}>
+                            <Typography variant="caption" color={msg.sender === 'me' ? 'white' : 'text.secondary'}>
+                              {msg.time}
+                            </Typography>
+                            {msg.sender === 'me' && getMessageStatusIcon('read')}
+                          </Box>
+                        </Paper>
+                      </Box>
+                    ))}
+                    <div ref={messagesEndRef} />
                   </Box>
-                ))}
-                <div ref={messagesEndRef} />
-              </Box>
 
-              {/* Message Input */}
-              <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-                <Grid container spacing={1} alignItems="center">
-                  <Grid item xs>
+                  {/* Message Input */}
+                  <Box sx={{ 
+                    p: 2, 
+                    borderTop: 1, 
+                    borderColor: 'divider',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <Tooltip title="Attach Files">
+                      <IconButton color="primary">
+                        <AttachFileIcon />
+                      </IconButton>
+                    </Tooltip>
                     <TextField
                       fullWidth
-                      variant="outlined"
                       placeholder="Type a message..."
+                      variant="outlined"
+                      size="small"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      disabled={sending}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && newMessage.trim()) {
+                          handleSendMessage();
+                        }
+                      }}
                     />
-                  </Grid>
-                  <Grid item>
-                    <IconButton
-                      color="primary"
-                      onClick={handleSendMessage}
+                    <Tooltip title="Emoji">
+                      <IconButton color="primary">
+                        <EmojiEmotionsIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <IconButton 
+                      color="primary" 
                       disabled={!newMessage.trim() || sending}
+                      onClick={handleSendMessage}
                     >
-                      <SendIcon />
+                      {sending ? <CircularProgress size={24} /> : <SendIcon />}
                     </IconButton>
-                  </Grid>
-                </Grid>
-              </Box>
-            </>
-          ) : (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%'
-              }}
-            >
-              <Typography variant="h6" color="text.secondary">
-                Select a conversation to start chatting
-              </Typography>
-            </Box>
-          )}
-        </Grid>
+                  </Box>
+                </>
+              ) : (
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  height: '100%',
+                  p: 3,
+                  textAlign: 'center'
+                }}>
+                  <img 
+                    src="/chat-placeholder.svg" 
+                    alt="Select a chat"
+                    style={{ 
+                      width: '200px', 
+                      marginBottom: '24px',
+                      opacity: 0.7
+                    }}
+                  />
+                  <Typography variant="h6" gutterBottom>
+                    Welcome to Community Chat
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    Select a chat from the list to start messaging, or create a new chat with the + button.
+                  </Typography>
+                </Box>
+              )}
+            </Grid>
+          </Grid>
+        </Box>
       </Grid>
-    </Box>
->>>>>>> e2f698f08add8842de45a8b997d24bd25067372e
+    </Grid>
   );
 };
 

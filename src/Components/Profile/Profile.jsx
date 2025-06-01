@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useNavigate, useParams } from "react-router-dom";
-import { Avatar, Button, CircularProgress } from "@mui/material";
+import { Avatar, Button, CircularProgress, Tabs, Tab } from "@mui/material";
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
 import PostCard from "../HomeSection/PostCard";
 import GradeIcon from '@mui/icons-material/Grade';
 import ProfileModal from "./ProfileModal";
@@ -17,7 +13,7 @@ import { userAPI, articleAPI } from "../../config/api.config";
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 
 const Profile = () => {
-  const [tabValue, setTabValue] = useState("1");
+  const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
   const { id } = useParams();
   const [openProfileModal, setOpenProfileModal] = useState(false);
@@ -49,7 +45,7 @@ const Profile = () => {
   const handleBack = () => navigate(-1);
   
   const handleFollowUser = () => {
-    console.log("follow user");
+    // Implementation for following a user would go here
   };
   
   const handletabChange = (event, newValue) => {
@@ -268,6 +264,35 @@ const Profile = () => {
     ensureUserDataConsistency();
   }, []);
 
+  // Custom TabPanel component to replace MUI Lab's TabPanel
+  const CustomTabPanel = (props) => {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && (
+          <Box sx={{ p: 3 }}>
+            {children}
+          </Box>
+        )}
+      </div>
+    );
+  };
+
+  // Helper function for tab accessibility
+  const a11yProps = (index) => {
+    return {
+      id: `simple-tab-${index}`,
+      'aria-controls': `simple-tabpanel-${index}`,
+    };
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -390,60 +415,56 @@ const Profile = () => {
       </section>
 
       <section className="py-5 px-3">
-      <TabContext value={tabValue}>
-  <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-    <TabList onChange={handletabChange} aria-label="lab API tabs example">
-      <Tab label="Articles" value="1" />
-      <Tab label="Replies" value="2" />
-      <Tab label="Media" value="3" />
-      <Tab label="Likes" value="4" />
-    </TabList>
-  </Box>
-  <TabPanel value="1">
+      <Tabs value={tabValue} onChange={handletabChange} aria-label="basic tabs example">
+        <Tab label="Articles" {...a11yProps(0)} />
+        <Tab label="Replies" {...a11yProps(1)} />
+        <Tab label="Media" {...a11yProps(2)} />
+        <Tab label="Likes" {...a11yProps(3)} />
+      </Tabs>
+      <CustomTabPanel value={tabValue} index={0}>
             {articles.length > 0 ? 
               articles.map((article) => <PostCard key={article.id} article={article} />) : 
               <p className="text-center py-5 text-gray-500">No articles found</p>
             }
-  </TabPanel>
-  <TabPanel value="2">user's Replies</TabPanel>
-          <TabPanel value="3">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {articles.filter(article => article.image).map((article) => (
-                <div key={article.id} className="relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-sm hover:shadow-md">
-                  <img 
-                    src={article.image} 
-                    alt="Media content" 
-                    className="w-full h-full object-cover cursor-pointer"
-                    onClick={() => navigate(`/articledetails/${article.id}`)}
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                    <p className="text-white text-xs truncate">{article.content}</p>
-                  </div>
-                </div>
-              ))}
-              {articles.filter(article => article.image).length === 0 && (
-                <div className="col-span-3 py-10 text-center">
-                  <div className="flex flex-col items-center">
-                    <PhotoLibraryIcon style={{ fontSize: 48 }} className="text-gray-300 mb-2" />
-                    <p className="text-gray-500 mb-2">No media found</p>
-                    <p className="text-sm text-gray-400">Share a post with an image to see it here</p>
-                  </div>
-                </div>
-              )}
+      </CustomTabPanel>
+      <CustomTabPanel value={tabValue} index={1}>user's Replies</CustomTabPanel>
+      <CustomTabPanel value={tabValue} index={2}>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {articles.filter(article => article.image).map((article) => (
+            <div key={article.id} className="relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-sm hover:shadow-md">
+              <img 
+                src={article.image} 
+                alt="Media content" 
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => navigate(`/articledetails/${article.id}`)}
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                <p className="text-white text-xs truncate">{article.content}</p>
+              </div>
             </div>
-          </TabPanel>
-  <TabPanel value="4">Likes</TabPanel>
-</TabContext>
-      </section>
+          ))}
+          {articles.filter(article => article.image).length === 0 && (
+            <div className="col-span-3 py-10 text-center">
+              <div className="flex flex-col items-center">
+                <PhotoLibraryIcon style={{ fontSize: 48 }} className="text-gray-300 mb-2" />
+                <p className="text-gray-500 mb-2">No media found</p>
+                <p className="text-sm text-gray-400">Share a post with an image to see it here</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </CustomTabPanel>
+      <CustomTabPanel value={tabValue} index={3}>Likes</CustomTabPanel>
+    </section>
 
-      <section>
-        <ProfileModal 
-          handleClose={handleClose} 
-          open={openProfileModal} 
-          profile={profile}
-          onProfileUpdate={handleProfileUpdate}
-        />
-      </section>
+    <section>
+      <ProfileModal 
+        handleClose={handleClose} 
+        open={openProfileModal} 
+        profile={profile}
+        onProfileUpdate={handleProfileUpdate}
+      />
+    </section>
     </div>
   );
 };
